@@ -4,20 +4,16 @@
 #include <math.h>
 #include <SDL2/SDL.h>
 
+
+#include "constantes.h"
 #include "struct.h"
+#include "rendu.h"
 #include "vecteur3d.h"
 
 
-#define GRANDEUR_FENETRE 100
-#define HAUTEUR_FENETRE 10*GRANDEUR_FENETRE
-#define LARGEUR_FENETRE 15*GRANDEUR_FENETRE
-#define PI 3.14159265
 
-
-
-
-SDL_Window* pWindow = NULL;
-SDL_Renderer* renderer;
+extern SDL_Window* pWindow;
+extern SDL_Renderer* renderer;
 Point3D origine = {0, 0, 0};
 double rayon = 1000;
 double alpha = 0, beta = 0;
@@ -32,22 +28,6 @@ Point3D pcam;
 Point3D pnord;
 
 
-
-
-
-void afficherPoint(Point2D p, int epaisseur, int r, int g, int b){
-	SDL_SetRenderDrawColor(renderer, r, g, b,   255);
-	if (epaisseur <= 1) {
-		epaisseur=1;
-		SDL_RenderDrawPoint(renderer, p.x, p.y);
-	} else {
-		SDL_Rect rect;
-		rect.x = p.x-(epaisseur/2); rect.y = p.y-(epaisseur/2);
-		rect.w = epaisseur; rect.h = epaisseur;
-		SDL_RenderFillRect(renderer, &rect);
-	}
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0,   255);
-}
 
 
 void calculer_vecteurs_plancam(){
@@ -103,24 +83,9 @@ int main(int argc, char const *argv[])
 	int quit = 0;
 	SDL_Event event;
 
-	if (SDL_Init(SDL_INIT_VIDEO) != 0 ) {
-    	fprintf(stdout,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
-		return EXIT_FAILURE;
-    }
 
-	pWindow = SDL_CreateWindow("3dmatrices",
-	SDL_WINDOWPOS_UNDEFINED,
-    SDL_WINDOWPOS_UNDEFINED,
-    LARGEUR_FENETRE,
-	HAUTEUR_FENETRE,
-	SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-
-	if(pWindow) {
-		renderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); // Création du renderer
-		if(renderer == NULL) {
-		   printf("Erreur lors de la creation d'un renderer : %s",SDL_GetError());
-		   return EXIT_FAILURE;
-		}
+	if(init_sdl()) {
+		init_renderer();
 
 		SDL_RenderClear(renderer);
 
@@ -173,8 +138,6 @@ int main(int argc, char const *argv[])
 		printCoordVecteur3D(vpk);
 
 
-
-
 		renduPoint1(origine, 255,0,0);
 		renduPoint1(pnord, 0,255,255);
 		renduPoint1(psud, 0,255,255);
@@ -190,6 +153,9 @@ int main(int argc, char const *argv[])
 		renduPoint1(p5,0,255,0);
 
 
+		Point2D p1b = {300, 300};
+		Point2D p2b = {500, 400};
+		bresenham(p1b, p2b);
 
 
 
@@ -241,6 +207,7 @@ int main(int argc, char const *argv[])
 
 					case SDL_MOUSEMOTION:
 						SDL_GetMouseState(&mx, &my);
+						p2b.x = mx; p2b.y = my;
 						//printf("mx: %d, my: %d\n", mx, my);
 						alpha = (HAUTEUR_FENETRE-my)/500.0;
 						beta = (LARGEUR_FENETRE-mx)/500.0;
@@ -265,6 +232,8 @@ int main(int argc, char const *argv[])
 			renduPoint1(p3,0,255,0);
 			renduPoint1(p4,0,255,0);
 			renduPoint1(p5,0,255,0);
+
+			bresenham(p1b, p2b);
 
 
 			SDL_RenderPresent(renderer);

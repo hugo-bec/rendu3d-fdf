@@ -1,11 +1,14 @@
 CFLAGS=-lm
 SDLFLAGS=`sdl2-config --cflags --libs`
 
-3dpoints: vecteur3d.o main.o
+3dpoints: vecteur3d.o rendu.o main.o
 	gcc -o $@ $^ $(SDLFLAGS) $(CFLAGS)
 	rm -r *.o
 
 vecteur3d.o: vecteur3d.c
+	gcc -c $^ $(CFLAGS)
+
+rendu.o: rendu.c
 	gcc -c $^ $(CFLAGS)
 
 main.o: main.c

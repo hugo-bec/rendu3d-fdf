@@ -22,4 +22,29 @@ struct Vecteur3D{
 	double z;
 };
 
+
+
+typedef struct Arete3D Arete3D;
+struct Arete3D{
+	Point3D* p1;
+	Point3D* p2;
+};
+
+typedef struct NoeudArete3D NoeudArete3D;
+struct NoeudArete3D{
+	Arete3D a;
+	Arete3D* suiv;
+};
+
+
+
+
+
+
+
+
+
+
+
+
 #endif

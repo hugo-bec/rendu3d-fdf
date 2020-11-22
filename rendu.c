@@ -41,14 +41,14 @@ void init_renderer(){
 
 
 
-void afficherPoint(Point2D p, int epaisseur, int r, int g, int b){
+void afficherPoint(Point2D* p, int epaisseur, int r, int g, int b){
 	SDL_SetRenderDrawColor(renderer, r, g, b,   255);
 	if (epaisseur <= 1) {
 		epaisseur=1;
-		SDL_RenderDrawPoint(renderer, p.x, p.y);
+		SDL_RenderDrawPoint(renderer, p->x, p->y);
 	} else {
 		SDL_Rect rect;
-		rect.x = p.x-(epaisseur/2); rect.y = p.y-(epaisseur/2);
+		rect.x = p->x-(epaisseur/2); rect.y = p->y-(epaisseur/2);
 		rect.w = epaisseur; rect.h = epaisseur;
 		SDL_RenderFillRect(renderer, &rect);
 	}
@@ -61,10 +61,13 @@ void afficherPoint(Point2D p, int epaisseur, int r, int g, int b){
  *  Merci également à Jacques-Olivier Lapeyre.
  */
 
-void bresenham(Point2D p1, Point2D p2){
+void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
+
+    Point2D p1 = {po1->x, po1->y};
+    Point2D p2 = {po2->x, po2->y};
 
 	int e, dx, dy;
-	afficherPoint(p2, 2, 128,128,128);
+	afficherPoint(&p2, 2, r,g,b);
 
     dx = p2.x - p1.x;
     if (dx != 0) {
@@ -74,8 +77,8 @@ void bresenham(Point2D p1, Point2D p2){
                 if (dx >= dy) {
                     e = dx; dx = e*2; dy *= 2;
                     while (1) {
-                        printf("brnhm: 1\n");
-                        afficherPoint(p1, 2, 128,128,128);
+                        //printf("brnhm: 1\n");
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         if ((p1.x += 1) == p2.x) {break;}
                         if ((e -= dy) < 0) {
                             p1.y += 1; e += dx;
@@ -84,8 +87,8 @@ void bresenham(Point2D p1, Point2D p2){
                 } else {
                     e = dy; dy = e*2; dx *= 2;
                     while (1) {
-                        printf("brnhm: 2\n");
-                        afficherPoint(p1, 2, 128,128,128);
+                        //printf("brnhm: 2\n");
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         if ((p1.y += 1) == p2.y) {break;}
                         if ((e -= dx) < 0) {
                             p1.x += 1; e += dy;
@@ -96,8 +99,8 @@ void bresenham(Point2D p1, Point2D p2){
                 if (dx >= -dy) {
                     e = dx; dx = e*2; dy *= 2;
                     while (1) {
-                        printf("brnhm: 3\n");
-                        afficherPoint(p1, 2, 128,128,128);
+                        //printf("brnhm: 3\n");
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         if ((p1.x += 1) == p2.x) {break;}
                         if ((e += dy) < 0) {
                             p1.y -= 1; e += dx;
@@ -106,8 +109,8 @@ void bresenham(Point2D p1, Point2D p2){
                 } else {
                     e = dy; dy = e*2; dx *= 2;
                     while (1) {
-                        printf("brnhm: 4\n");
-                        afficherPoint(p1, 2, 128,128,128);
+                        //printf("brnhm: 4\n");
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         if ((p1.y -= 1) == p2.y) {break;}
                         if ((e += dx) > 0) {
                             p1.x += 1; e += dy;
@@ -116,7 +119,7 @@ void bresenham(Point2D p1, Point2D p2){
                 }
             } else {    //dy == 0
                 while (p1.x != p2.x) {
-                    afficherPoint(p1, 2, 128,128,128);
+                    afficherPoint(&p1, epaisseur, r,g,b);
                     (p1.x += 1);
                 }
             }
@@ -126,8 +129,8 @@ void bresenham(Point2D p1, Point2D p2){
                 if (-dx >= dy) {
                     e = dx; dx *= 2; dy *= 2;
                     while (1) {
-                        printf("brnhm: 5+\n");
-                        afficherPoint(p1, 2, 128,128,128);
+                        //printf("brnhm: 5+\n");
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         if ((p1.x -= 1) == p2.x) {break;}
                         if ((e += dy) >= 0) {
                             p1.y += 1; e += dx;
@@ -136,8 +139,8 @@ void bresenham(Point2D p1, Point2D p2){
                 } else {
                     e = dy; dy = e*2; dx *= 2;
                     while (1) {
-                        printf("brnhm: 6\n");
-                        afficherPoint(p1, 2, 128,128,128);
+                        //printf("brnhm: 6\n");
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         if ((p1.y += 1) == p2.y) {break;}
                         if ((e += dx) < 0) {
                             p1.x -= 1; e += dy;
@@ -149,8 +152,8 @@ void bresenham(Point2D p1, Point2D p2){
                 if (dx <= dy) {
                     e = dx; dx = e*2; dy *= 2;
                     while (1) {
-                        printf("brnhm: 7\n");
-                        afficherPoint(p1, 2, 128,128,128);
+                        //printf("brnhm: 7\n");
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         if ((p1.x -= 1) == p2.x) {break;}
                         if ((e -= dy) >= 0) {
                             p1.y -= 1; e += dx;
@@ -159,8 +162,8 @@ void bresenham(Point2D p1, Point2D p2){
                 } else {
                     e = dy; dy = e*2; dx *= 2;
                     while (1) {
-                        printf("brnhm: 8\n");
-                        afficherPoint(p1, 2, 128,128,128);
+                        //printf("brnhm: 8\n");
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         if ((p1.y -= 1) == p2.y) {break;}
                         if ((e -= dx) >= 0) {
                             p1.x -= 1; e += dy;
@@ -169,7 +172,7 @@ void bresenham(Point2D p1, Point2D p2){
                 }
             } else {    //dy == 0
                 while (p1.x != p2.x) {
-                    afficherPoint(p1, 2, 128,128,128);
+                    afficherPoint(&p1, epaisseur, r,g,b);
                     (p1.x -= 1);
                 }
             }
@@ -178,12 +181,12 @@ void bresenham(Point2D p1, Point2D p2){
             if (dy != 0) {
                 if (dy > 0) {
                     while (p1.y != p2.y) {
-                        afficherPoint(p1, 2, 128,128,128);
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         (p1.y += 1);
                     }
                 } else {
                     while (p1.y != p2.y) {
-                        afficherPoint(p1, 2, 128,128,128);
+                        afficherPoint(&p1, epaisseur, r,g,b);
                         (p1.y -= 1);
                     }
                 }

@@ -11,8 +11,8 @@ struct Point3D{
 
 typedef struct Point2D Point2D;
 struct Point2D{
-	double x;
-	double y;
+	int x;
+	int y;
 };
 
 typedef struct Vecteur3D Vecteur3D;
@@ -32,8 +32,8 @@ struct Arete3D{
 
 typedef struct NoeudArete3D NoeudArete3D;
 struct NoeudArete3D{
-	Arete3D a;
-	Arete3D* suiv;
+	Arete3D* arete;
+	NoeudArete3D* suiv;
 };
 
 

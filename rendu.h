@@ -11,9 +11,9 @@
 SDL_Window* init_sdl();
 void init_renderer();
 
-void afficherPoint(Point2D p, int epaisseur, int r, int g, int b);
+void afficherPoint(Point2D* p, int epaisseur, int r, int g, int b);
 
-void bresenham(Point2D p1, Point2D p2);
+void bresenham(Point2D* p1, Point2D* p2, int epaisseur, int r, int g, int b);
 
 
 

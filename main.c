@@ -41,40 +41,72 @@ void calculer_vecteurs_plancam(){
 	produitk(v_cart_rayon[1], -cos(alpha)*sin(beta), &vpi[1]);
 	produitk(v_cart_rayon[2], sin(alpha), &vpi[2]);
 	addition(vpi, 3, &vplan_cam_j);
-	//produitk(vplan_cam_i, -1, &vplan_cam_i);
 
 	produitk(v_cart_rayon[0], sin(beta), &vpi[0]);
 	produitk(v_cart_rayon[1], -cos(beta), &vpi[1]);
 	addition(vpi, 2, &vplan_cam_i);
-	//produitk(vplan_cam_j, -1, &vplan_cam_j);
 }
 
 
-void renduPoint1(Point3D p, int r, int g, int b){
+Point2D* projPoint1(Point3D* p, Point2D* proj){
 
-	Point2D paff;
-	Vecteur3D vcam_p = getVecteur(pcam, p);
+	Vecteur3D vcam_p = getVecteur(pcam, *p);
 
-	paff.x = (scalaire3D(vcam_p, vplan_cam_i) / scalaire3D(vplan_cam_i, vplan_cam_i))*400 + (LARGEUR_FENETRE/2);
-	paff.y = (scalaire3D(vcam_p, vplan_cam_j) / scalaire3D(vplan_cam_j, vplan_cam_j))*400 + (HAUTEUR_FENETRE/2);
-
-	afficherPoint(paff, 16, r,g,b);
+	proj->x = (int) ((scalaire3D(vcam_p, vplan_cam_i) / scalaire3D(vplan_cam_i, vplan_cam_i))
+		*GRANDEUR_FENETRE*5 + (LARGEUR_FENETRE/2)) + 0.5;
+	proj->y = (int) ((scalaire3D(vcam_p, vplan_cam_j) / scalaire3D(vplan_cam_j, vplan_cam_j))
+		*GRANDEUR_FENETRE*5 + (HAUTEUR_FENETRE/2)) + 0.5;
 }
 
 
 void updateCam(){
-	//printf("alpha: %lf, beta: %lf\n", alpha, beta);
 	pcam.x = rayon*sin(alpha)*cos(beta);
 	pcam.y = rayon*sin(alpha)*sin(beta);
 	pcam.z = rayon*cos(alpha);
 	vcam = getVecteur(pcam, origine);
 
 	calculer_vecteurs_plancam();
+}
 
-	/*calculer_vecteurs_plancam();
-	printCoordVecteur3D(vplan_cam_i);
-	printCoordVecteur3D(vplan_cam_j);
-	printf("scalaire vplan_cam_i/j: %lf\n" ,scalaire(vplan_cam_i, vplan_cam_j));*/
+
+NoeudArete3D* ajoutArete(NoeudArete3D* n, Point3D* p1, Point3D* p2){
+	Arete3D* a = malloc(sizeof(Arete3D));
+	a->p1 = p1; a->p2 = p2;
+	NoeudArete3D* new_n = malloc(sizeof(NoeudArete3D));
+	new_n->arete = a;
+	new_n->suiv = NULL;
+
+	if (n == NULL) {
+		return new_n;
+	} else {
+		while (n->suiv != NULL) {
+			n = n->suiv;
+		}
+		n->suiv = new_n;
+		return new_n;
+	}
+}
+
+/*void freeNoeud(NoeudArete3D* n){		//A FAIRE
+	NoeudArete3D* tete_prisme = n;
+	while (n != NULL) {
+		while (n->suiv != NULL) {
+			n = n->suiv;
+		}
+		n = tete_prisme;
+	}
+}*/
+
+
+void afficherAretes(NoeudArete3D* tete, int epaisseur, int r, int g, int b){
+	NoeudArete3D* ni = tete;
+	Point2D proj1, proj2;
+	while (ni != NULL) {
+		projPoint1(ni->arete->p1, &proj1);
+		projPoint1(ni->arete->p2, &proj2);
+		bresenham(&proj1, &proj2, epaisseur, r,g,b);
+		ni = ni->suiv;
+	}
 }
 
 
@@ -86,88 +118,60 @@ int main(int argc, char const *argv[])
 
 	if(init_sdl()) {
 		init_renderer();
-
 		SDL_RenderClear(renderer);
 
-		//SDL_SetRenderDrawColor(renderer, 0, 255, 0,   255);
 		int mx, my;
+		Point2D proj1, proj2;
 
-		Point3D pnord = {0,0,rayon};
-		Point3D psud = {0,0,-rayon};
-		Point3D pest = {rayon,0,0};
-		Point3D pouest = {-rayon,0,0};
-		Point3D parriere = {0,rayon,0};
-		Point3D pavant = {0,-rayon,0};
+		Point3D pcard[] = {{0,0,rayon}		//nord
+							,{0,0,-rayon}	//sud
+							,{rayon,0,0}	//est
+							,{-rayon,0,0}	//ouest
+							,{0,rayon,0}	//arriere
+							,{0,-rayon,0}};	//avant
 
-		Point3D p1 = {100, -100, 100};
-		Point3D p2 = {100, 100, 100};
-		Point3D p3 = {-100, -100, 100};
-		Point3D p4 = {-100, 100, 100};
-		Point3D p5 = {0, 0, -100};
+		Point3D ppyramide[] = {{100, -100, 100}		//base
+							, {100, 100, 100}
+							, {-100, -100, 100}
+							, {-100, 100, 100}
+							, {0, 0, -100}};		//sommet
 
-		Point3D a = {1,2,3};
-		Point3D b = {1,2,5};
 
-		Vecteur3D va = {5,1,0};
-		Vecteur3D vb = {2,3,0};
+		NoeudArete3D* tete_prisme = NULL;
+		tete_prisme = ajoutArete(tete_prisme, pcard+1,pcard+2);
+		ajoutArete(tete_prisme, pcard+1,pcard+3);
+		ajoutArete(tete_prisme, pcard+1,pcard+4);
+		ajoutArete(tete_prisme, pcard+1,pcard+5);
+		ajoutArete(tete_prisme, pcard+0,pcard+2);
+		ajoutArete(tete_prisme, pcard+0,pcard+3);
+		ajoutArete(tete_prisme, pcard+0,pcard+4);
+		ajoutArete(tete_prisme, pcard+0,pcard+5);
+		ajoutArete(tete_prisme, pcard+2,pcard+4);
+		ajoutArete(tete_prisme, pcard+4,pcard+3);
+		ajoutArete(tete_prisme, pcard+3,pcard+5);
+		ajoutArete(tete_prisme, pcard+5,pcard+2);
+
+		NoeudArete3D* tete_pyramide = NULL;
+		tete_pyramide = ajoutArete(tete_pyramide, ppyramide+0,ppyramide+1);
+		ajoutArete(tete_pyramide, ppyramide+1,ppyramide+3);
+		ajoutArete(tete_pyramide, ppyramide+3,ppyramide+2);
+		ajoutArete(tete_pyramide, ppyramide+2,ppyramide+0);
+		ajoutArete(tete_pyramide, ppyramide+4,ppyramide+0);
+		ajoutArete(tete_pyramide, ppyramide+4,ppyramide+1);
+		ajoutArete(tete_pyramide, ppyramide+4,ppyramide+2);
+		ajoutArete(tete_pyramide, ppyramide+4,ppyramide+3);
+
+		afficherAretes(tete_prisme,  4, 0,128,255);
+		afficherAretes(tete_pyramide, 4, 255,255,0);
+
 
 		updateCam();
-		vcam = getVecteur(pcam, origine);
-
-		printCoordVecteur3D(getVecteur(a, b));
-		printf("scalaire va vb: %lf\n", scalaire3D(va, vb));
-		printf("longueur va: %lf\n", longueur(va));
-		printf("longueur vb: %lf\n", longueur(vb));
-
-		printf("angle va vb: %lf\n", getAngle(va, vb));
-
-		calculer_vecteurs_plancam();
-		printCoordVecteur3D(vplan_cam_i);
-		printCoordVecteur3D(vplan_cam_j);
-		printf("scalaire vplan_cam_i/j: %lf\n" ,scalaire3D(vplan_cam_i, vplan_cam_j));
-
-		Vecteur3D vpk;
-		produitk(va, 4.26, &vpk);
-		printCoordVecteur3D(vpk);
-
-		Vecteur3D vt[3] = {{1,2,3}, {4,5,6}, {7,8,9}};
-		//printCoordVecteur3D(vt[0]);
-		//printCoordVecteur3D(vt[1]);
-		//printCoordVecteur3D(vt[2]);
-		addition(vt, 3, &vpk);
-		printCoordVecteur3D(vpk);
-
-
-		renduPoint1(origine, 255,0,0);
-		renduPoint1(pnord, 0,255,255);
-		renduPoint1(psud, 0,255,255);
-		renduPoint1(pest, 0,255,255);
-		renduPoint1(pouest, 0,255,255);
-		renduPoint1(pavant, 0,255,255);
-		renduPoint1(parriere, 0,255,255);
-
-		renduPoint1(p1,0,255,0);
-		renduPoint1(p2,0,255,0);
-		renduPoint1(p3,0,255,0);
-		renduPoint1(p4,0,255,0);
-		renduPoint1(p5,0,255,0);
-
-
-		Point2D p1b = {300, 300};
-		Point2D p2b = {500, 400};
-		bresenham(p1b, p2b);
-
-
-
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0,   255);
-
 		SDL_RenderPresent(renderer);
 
 
-
 		while (!quit) {
-			//actualiser = 0;
 			while (SDL_PollEvent(&event)){
 				switch(event.type) {
 			        case SDL_QUIT: // Clic sur la croix
@@ -175,7 +179,6 @@ int main(int argc, char const *argv[])
 			            break;
 
 					case SDL_KEYDOWN:
-						//printf("KEY\n");
 						switch( event.key.keysym.sym )
                         {
 							case SDLK_UP:
@@ -195,19 +198,16 @@ int main(int argc, char const *argv[])
 								updateCam();
 								break;
 						}
-						//printCoordPoint3D(pcam);
-						//printCoordVecteur3D(vcam);
 						break;
 
 					case SDL_MOUSEWHEEL:
-						printf("Roll %d\n", event.wheel.y*10);
+						//printf("Roll %d\n", event.wheel.y*10);
 						rayon += event.wheel.y*100;
 						updateCam();
 						break;
 
 					case SDL_MOUSEMOTION:
 						SDL_GetMouseState(&mx, &my);
-						p2b.x = mx; p2b.y = my;
 						//printf("mx: %d, my: %d\n", mx, my);
 						alpha = (HAUTEUR_FENETRE-my)/500.0;
 						beta = (LARGEUR_FENETRE-mx)/500.0;
@@ -218,26 +218,13 @@ int main(int argc, char const *argv[])
 
 			SDL_RenderClear(renderer);
 
-
-			renduPoint1(origine, 255,0,0);
-			renduPoint1(pnord, 0,255,255);
-			renduPoint1(psud, 0,255,255);
-			renduPoint1(pest, 0,255,255);
-			renduPoint1(pouest, 0,255,255);
-			renduPoint1(pavant, 0,255,255);
-			renduPoint1(parriere, 0,255,255);
-
-			renduPoint1(p1,0,255,0);
-			renduPoint1(p2,0,255,0);
-			renduPoint1(p3,0,255,0);
-			renduPoint1(p4,0,255,0);
-			renduPoint1(p5,0,255,0);
-
-			bresenham(p1b, p2b);
-
+			afficherAretes(tete_prisme,  4, 0,128,255);
+			afficherAretes(tete_pyramide, 4, 255,255,0);
 
 			SDL_RenderPresent(renderer);
 		}
+
+		//freeNoeud
 
 		SDL_DestroyWindow(pWindow);
 	}

@@ -22,7 +22,17 @@ struct Vecteur3D{
 	double z;
 };
 
+/*struct Camera{
+	Vecteur3D ;
+}*/
 
+
+
+
+
+/**************************************
+ *	GRAPHE
+ **************************************/
 
 typedef struct Arete3D Arete3D;
 struct Arete3D{
@@ -37,6 +47,18 @@ struct NoeudArete3D{
 };
 
 
+
+typedef struct Noeud Noeud;
+struct Noeud{
+	void* elem;
+	Noeud* suiv;
+};
+
+typedef struct Graphe3D Graphe3D;
+struct Graphe3D{
+	Noeud* point_tete;
+	Noeud* arete_tete;
+};
 
 
 

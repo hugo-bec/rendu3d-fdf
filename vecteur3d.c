@@ -6,11 +6,11 @@
 
 
 
-void printCoordPoint3D(Point3D p){
-	printf("x:%lf y:%lf z:%lf\n", p.x, p.y, p.z);
+void printCoordPoint3D(Point3D* p){
+	printf("x:%lf y:%lf z:%lf\n", p->x, p->y, p->z);
 }
-void printCoordVecteur3D(Vecteur3D v){
-	printf("x:%lf y:%lf z:%lf\n", v.x, v.y, v.z);
+void printCoordVecteur3D(Vecteur3D* v){
+	printf("x:%lf y:%lf z:%lf\n", v->x, v->y, v->z);
 }
 
 
@@ -34,12 +34,10 @@ void produitk(Vecteur3D v, double k, Vecteur3D* vbuf){
 	vbuf->z = v.z*k;
 }
 
-Vecteur3D getVecteur(Point3D pa, Point3D pb){
-	Vecteur3D vecteur;
-	vecteur.x = pb.x - pa.x;
-	vecteur.y = pb.y - pa.y;
-	vecteur.z = pb.z - pa.z;
-	return vecteur;
+void getVecteur(Point3D* pa, Point3D* pb, Vecteur3D* vbuf){
+	vbuf->x = pb->x - pa->x;
+	vbuf->y = pb->y - pa->y;
+	vbuf->z = pb->z - pa->z;
 }
 
 double getAngle(Vecteur3D va, Vecteur3D vb){

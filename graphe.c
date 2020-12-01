@@ -80,6 +80,7 @@ void* ajout_arete_i(Graphe3D* g, int a, int b){
     return NULL;
 }
 
+//ajoute toutes les aretes à partir des indexes du tableau tab
 void ajout_aretes_i(Graphe3D* g, int tab[][2], int n){
     for (size_t i=0; i<n; i++) {
         ajout_arete_i(g, tab[i][0], tab[i][1]);
@@ -87,7 +88,7 @@ void ajout_aretes_i(Graphe3D* g, int tab[][2], int n){
 }
 
 
-void* ajout_point_xyz(Graphe3D* g, int x, int y, int z){
+void* ajout_point_xyz(Graphe3D* g, double x, double y, double z){
     Point3D* p = malloc(sizeof(Point3D));
 	p->x = x;
     p->y = y;
@@ -104,10 +105,40 @@ void* ajout_point_xyz(Graphe3D* g, int x, int y, int z){
     }
 }
 
+//ajoute tous les points à partir du tableau tab
 void ajout_points_xyz(Graphe3D* g, double tab[][3], size_t n){
     for (size_t i=0; i<n; i++) {
         ajout_point_xyz(g, tab[i][0], tab[i][1], tab[i][2]);
     }
+}
+
+
+
+
+/*
+ * GRAPHE STATIQUE
+ */
+
+GrapheStatique3D* creer_graphe_statique(size_t nbp, size_t nba){
+    GrapheStatique3D* g = malloc(sizeof(GrapheStatique3D));
+    g->nbPoints = nbp;
+    g->nbAretes = nba;
+    g->tab_points = malloc(sizeof(Point3D)*nbp);
+    g->tab_aretes = malloc(sizeof(Arete3D)*nba);
+    return g;
+}
+
+GrapheStatique3D* init0_graphe_statique(GrapheStatique3D* g){
+    for (size_t i=0; i<g->nbPoints; i++) {
+        g->tab_points[i].x = 0;
+        g->tab_points[i].y = 0;
+        g->tab_points[i].z = 0;
+    }
+    for (size_t i=0; i<g->nbAretes; i++) {
+        g->tab_aretes[i].p1 = g->tab_points+0;
+        g->tab_aretes[i].p2 = g->tab_points+0;
+    }
+    return g;
 }
 
 

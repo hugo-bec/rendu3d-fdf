@@ -15,6 +15,10 @@ void* ajout_point_xyz(Graphe3D* g, double x, double y, double z);
 void ajout_points_xyz(Graphe3D* g, double tab[][3], int n);
 
 
+// Graphe statique
+GrapheStatique3D* creer_graphe_statique(size_t nbp, size_t nba);
+GrapheStatique3D* init0_graphe_statique(GrapheStatique3D* g);
+
 
 
 

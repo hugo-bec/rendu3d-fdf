@@ -2,9 +2,9 @@ CFLAGS=-lm
 SDLFLAGS=`sdl2-config --cflags --libs`
 
 
-3dpoints: graphe.o vecteur3d.o rendu.o main.o
+3dpoints: graphe.o vecteur3d.o rendu.o generation_terrain.o main.o
 	gcc -o $@ $^ $(SDLFLAGS) $(CFLAGS)
-	rm -r *.o *.gch
+	rm -r *.o #*.gch
 	find /home/alstm/Documents/projets_c/3dpoints/ -type f -exec touch {} +
 
 vecteur3d.o: vecteur3d.c
@@ -14,6 +14,9 @@ rendu.o: rendu.c
 	gcc -c $^ $(CFLAGS)
 
 graphe.o: graphe.c
+	gcc -c $^ $(CFLAGS)
+
+generation_terrain.o: generation_terrain.c
 	gcc -c $^ $(CFLAGS)
 
 main.o: main.c

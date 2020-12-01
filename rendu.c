@@ -94,7 +94,7 @@ void update_cam(){
 	calculer_vecteurs_plancam();
 }
 
-void afficher_point(Point2D* p, int epaisseur, int r, int g, int b){
+void afficher_point2D(Point2D* p, int epaisseur, int r, int g, int b){
 	SDL_SetRenderDrawColor(renderer, r, g, b,   255);
 	if (epaisseur <= 1) {
 		epaisseur=1;
@@ -109,18 +109,56 @@ void afficher_point(Point2D* p, int epaisseur, int r, int g, int b){
 }
 
 
+
+
+/*
+ * RENDU GRAPHES
+ */
+void afficher_point(Point3D* p, int epaisseur, int r, int v, int b){
+	Point2D proj;
+	proj_point( p, &proj);
+	afficher_point2D(&proj, epaisseur, r,v,b);
+}
+
+void afficher_arete(Arete3D* a, int epaisseur, int r, int v, int b){
+	Point2D proj1, proj2;
+	proj_point( a->p1 , &proj1 );
+	proj_point( a->p2 , &proj2 );
+	bresenham(&proj1, &proj2, epaisseur, r,v,b);
+}
+
+
+
+void afficher_points(Graphe3D* g, int epaisseur, int r, int v, int b){
+	Noeud* ni = g->point_tete;
+	while (ni != NULL) {
+		afficher_point((Point3D*)ni->elem, epaisseur, r,v,b);
+		ni = ni->suiv;
+	}
+}
+
 void afficher_aretes(Graphe3D* g, int epaisseur, int r, int v, int b){
 	Noeud* ni = g->arete_tete;
-	Point2D proj1, proj2;
-	Arete3D* atemp;
-
 	while (ni != NULL) {
-		atemp = (Arete3D*)ni->elem;
-		proj_point( (Point3D*)atemp->p1 , &proj1 );
-		proj_point( (Point3D*)atemp->p2 , &proj2 );
-
-		bresenham(&proj1, &proj2, epaisseur, r,v,b);
+		afficher_arete((Arete3D*)ni->elem, epaisseur, r,v,b);
 		ni = ni->suiv;
+	}
+}
+
+
+
+void afficher_points_gstat(GrapheStatique3D* g, int epaisseur, int r, int v, int b){
+	for (Point3D* p = g->tab_points; p < g->tab_points + g->nbPoints-1; p++) {
+		afficher_point(p, epaisseur, r,v,b);
+	}
+}
+
+void afficher_aretes_gstat(GrapheStatique3D* g, int epaisseur, int r, int v, int b){
+	/*for (Arete3D* a = g->tab_aretes; a < g->tab_aretes + g->nbAretes-1; a++) {
+		afficher_arete(a, epaisseur, r,v,b);
+	}*/
+	for (size_t i = 0; i < g->nbAretes; i++) {
+		afficher_arete(g->tab_aretes+i, epaisseur, r,v,b);
 	}
 }
 
@@ -129,11 +167,9 @@ void afficher_aretes(Graphe3D* g, int epaisseur, int r, int v, int b){
 
 
 
-
-
-
-
 /*
+ *	BRENSENHAM
+ *
  *	https://fr.wikipedia.org/wiki/Algorithme_de_trac%C3%A9_de_segment_de_Bresenham
  *  Merci également à Jacques-Olivier Lapeyre.
  */
@@ -143,7 +179,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
     Point2D p2 = {po2->x, po2->y};
 
 	int e, dx, dy;
-	afficher_point(&p2, 2, r,g,b);
+	afficher_point2D(&p2, 2, r,g,b);
 
     dx = p2.x - p1.x;
     if (dx != 0) {
@@ -154,7 +190,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     e = dx; dx = e*2; dy *= 2;
                     while (1) {
                         //printf("brnhm: 1\n");
-                        afficher_point(&p1, epaisseur, r,g,b);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
                         if ((p1.x += 1) == p2.x) {break;}
                         if ((e -= dy) < 0) {
                             p1.y += 1; e += dx;
@@ -164,7 +200,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     e = dy; dy = e*2; dx *= 2;
                     while (1) {
                         //printf("brnhm: 2\n");
-                        afficher_point(&p1, epaisseur, r,g,b);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
                         if ((p1.y += 1) == p2.y) {break;}
                         if ((e -= dx) < 0) {
                             p1.x += 1; e += dy;
@@ -176,7 +212,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     e = dx; dx = e*2; dy *= 2;
                     while (1) {
                         //printf("brnhm: 3\n");
-                        afficher_point(&p1, epaisseur, r,g,b);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
                         if ((p1.x += 1) == p2.x) {break;}
                         if ((e += dy) < 0) {
                             p1.y -= 1; e += dx;
@@ -186,7 +222,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     e = dy; dy = e*2; dx *= 2;
                     while (1) {
                         //printf("brnhm: 4\n");
-                        afficher_point(&p1, epaisseur, r,g,b);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
                         if ((p1.y -= 1) == p2.y) {break;}
                         if ((e += dx) > 0) {
                             p1.x += 1; e += dy;
@@ -196,7 +232,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
             } else {    //dy == 0
                 //printf("brnhm: VERTICAL +++\n");
                 while (p1.x != p2.x) {
-                    afficher_point(&p1, epaisseur, r,g,b);
+                    afficher_point2D(&p1, epaisseur, r,g,b);
                     (p1.x += 1);
                 }
             }
@@ -207,7 +243,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     e = dx; dx *= 2; dy *= 2;
                     while (1) {
                         //printf("brnhm: 5+\n");
-                        afficher_point(&p1, epaisseur, r,g,b);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
                         if ((p1.x -= 1) == p2.x) {break;}
                         if ((e += dy) >= 0) {
                             p1.y += 1; e += dx;
@@ -217,7 +253,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     e = dy; dy = e*2; dx *= 2;
                     while (1) {
                         //printf("brnhm: 6\n");
-                        afficher_point(&p1, epaisseur, r,g,b);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
                         if ((p1.y += 1) == p2.y) {break;}
                         if ((e += dx) < 0) {
                             p1.x -= 1; e += dy;
@@ -230,7 +266,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     e = dx; dx = e*2; dy *= 2;
                     while (1) {
                         //printf("brnhm: 7\n");
-                        afficher_point(&p1, epaisseur, r,g,b);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
                         if ((p1.x -= 1) == p2.x) {break;}
                         if ((e -= dy) >= 0) {
                             p1.y -= 1; e += dx;
@@ -240,7 +276,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     e = dy; dy = e*2; dx *= 2;
                     while (1) {
                         //printf("brnhm: 8\n");
-                        afficher_point(&p1, epaisseur, r,g,b);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
                         if ((p1.y -= 1) == p2.y) {break;}
                         if ((e -= dx) >= 0) {
                             p1.x -= 1; e += dy;
@@ -250,7 +286,7 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
             } else {    //dy == 0
                 //printf("brnhm: VERTICAL -\n");
                 while (p1.x != p2.x) {
-                    afficher_point(&p1, epaisseur, r,g,b);
+                    afficher_point2D(&p1, epaisseur, r,g,b);
                     (p1.x -= 1);
                 }
             }
@@ -259,13 +295,13 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
             if (dy != 0) {
                 if (dy > 0) {
                     while (p1.y != p2.y) {
-                        afficher_point(&p1, epaisseur, r,g,b);
-                        (p1.y += 1);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
+                        (p1.y -= 1);
                     }
                 } else {
                     while (p1.y != p2.y) {
-                        afficher_point(&p1, epaisseur, r,g,b);
-                        (p1.y -= 1);
+                        afficher_point2D(&p1, epaisseur, r,g,b);
+                        (p1.y += 1);
                     }
                 }
             }

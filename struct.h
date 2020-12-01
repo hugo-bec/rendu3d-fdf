@@ -40,14 +40,6 @@ struct Arete3D{
 	Point3D* p2;
 };
 
-typedef struct NoeudArete3D NoeudArete3D;
-struct NoeudArete3D{
-	Arete3D* arete;
-	NoeudArete3D* suiv;
-};
-
-
-
 typedef struct Noeud Noeud;
 struct Noeud{
 	void* elem;
@@ -60,6 +52,13 @@ struct Graphe3D{
 	Noeud* arete_tete;
 };
 
+typedef struct GrapheStatique3D GrapheStatique3D;
+struct GrapheStatique3D{
+	size_t nbPoints;
+	size_t nbAretes;
+	Point3D* tab_points;
+	Arete3D* tab_aretes;
+};
 
 
 

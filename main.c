@@ -58,16 +58,17 @@ int main(int argc, char const *argv[])
 
 
 		//initialisation du terrain
-		size_t nbp_x = 30, nbp_y = 30;
+		size_t nbp_x = 40, nbp_y = 40;
 		GrapheStatique3D* terrain_stat = creer_graphe_statique(
 			nbp_x * nbp_y,
 			((nbp_x-1) * nbp_y) + ((nbp_y-1) * nbp_x) );
 		init0_graphe_statique(terrain_stat);
 
 		// formation du terrain
-		generation_double_boucle(terrain_stat, nbp_x, nbp_y, 0, 50, 20);
+		//generation_double_boucle(terrain_stat, nbp_x, nbp_y, 0, 50, 50);
+		//generation_spirale(terrain_stat, nbp_x, nbp_y, 0, 50, 20);
+		generation_random(terrain_stat, nbp_x, nbp_y, 0, 50, 100);
 
-		
 
 		update_cam();
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0,   255);

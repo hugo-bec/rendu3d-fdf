@@ -22,6 +22,12 @@ struct Vecteur3D{
 	double z;
 };
 
+typedef struct Vecteur2D Vecteur2D;
+struct Vecteur2D{
+	double x;
+	double y;
+};
+
 /*struct Camera{
 	Vecteur3D ;
 }*/

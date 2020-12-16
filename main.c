@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
 
 
 		//initialisation du terrain
-		size_t nbp_x = 40, nbp_y = 40;
+		size_t nbp_x = 100, nbp_y = 100;
 		GrapheStatique3D* terrain_stat = creer_graphe_statique(
 			nbp_x * nbp_y,
 			((nbp_x-1) * nbp_y) + ((nbp_y-1) * nbp_x) );
@@ -67,7 +67,11 @@ int main(int argc, char const *argv[])
 		// formation du terrain
 		//generation_double_boucle(terrain_stat, nbp_x, nbp_y, 0, 50, 50);
 		//generation_spirale(terrain_stat, nbp_x, nbp_y, 0, 50, 20);
-		generation_random(terrain_stat, nbp_x, nbp_y, 0, 50, 100);
+		//generation_random(terrain_stat, nbp_x, nbp_y, 0, 50, 100);
+		generation_bruit_perlin(terrain_stat, nbp_x, nbp_y, 0,
+			50,		//echelle
+			500,	//relief
+			0.05);	//frequence
 
 
 		update_cam();

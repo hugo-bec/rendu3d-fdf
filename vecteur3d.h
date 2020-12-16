@@ -7,6 +7,7 @@
 void printCoordPoint3D(Point3D* p);
 void printCoordVecteur3D(Vecteur3D* v);
 
+double scalaire2D(Vecteur2D va, Vecteur2D vb);
 double scalaire3D(Vecteur3D va, Vecteur3D vb);
 double longueur(Vecteur3D v);
 

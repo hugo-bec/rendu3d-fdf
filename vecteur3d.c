@@ -13,7 +13,9 @@ void printCoordVecteur3D(Vecteur3D* v){
 	printf("x:%lf y:%lf z:%lf\n", v->x, v->y, v->z);
 }
 
-
+double scalaire2D(Vecteur2D va, Vecteur2D vb){
+	return (va.x*vb.x)+(va.y*vb.y);
+}
 double scalaire3D(Vecteur3D va, Vecteur3D vb){
 	return (va.x*vb.x)+(va.y*vb.y)+(va.z*vb.z);
 }

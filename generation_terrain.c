@@ -17,7 +17,8 @@ Point3D* affecter_point3d(Point3D* p, double x, double y, double z){
 }
 
 
-GrapheStatique3D* quadrillage_terrain(GrapheStatique3D* g, size_t nbp_x, size_t nbp_y){
+GrapheStatique3D* quadrillage_aretes_terrain(GrapheStatique3D* g, size_t nbp_x, size_t nbp_y)
+{
     size_t indice = 0;
     for (size_t i = 0; i < nbp_x; i++) {
         for (size_t j = 0; j < nbp_y-1; j++) {
@@ -37,103 +38,84 @@ GrapheStatique3D* quadrillage_terrain(GrapheStatique3D* g, size_t nbp_x, size_t 
 }
 
 
-GrapheStatique3D* generation_random(GrapheStatique3D* g,
-    size_t nbp_x, size_t nbp_y,
-    double niveau, double echelle, int relief){
-
+GrapheStatique3D* creer_terrain_plat(size_t nbp_x, size_t nbp_y, double echelle)
+{
     size_t indice = 0;  //i*nbp_y + j
+    GrapheStatique3D* terrain = creer_graphe_statique(
+        nbp_x * nbp_y,
+        ((nbp_x-1) * nbp_y) + ((nbp_y-1) * nbp_x) );
 
     for (int i = 0; i < nbp_x; i++) {
         for (int j = 0; j < nbp_y; j++) {
-            affecter_point3d(g->tab_points + indice,
+            affecter_point3d(terrain->tab_points + indice,
                 i*echelle - (nbp_x*echelle/2),
                 j*echelle - (nbp_y*echelle/2),
-                (rand()%relief*2) - relief + 1 + niveau);
+                0);
             indice++;
         }
     }
-    return quadrillage_terrain(g, nbp_x, nbp_y);
+
+    return quadrillage_aretes_terrain(terrain, nbp_x, nbp_y);
+}
+
+
+GrapheStatique3D* generation_random(GrapheStatique3D* g,
+    size_t nbp_x, size_t nbp_y,
+    double niveau, int relief)
+{
+    for (int i = 0; i < nbp_x*nbp_y; i++) {
+        g->tab_points[i].z += (rand()%relief*2) - relief + 1 + niveau;
+    }
+    return g;
 }
 
 
 GrapheStatique3D* generation_double_boucle(GrapheStatique3D* g,
     size_t nbp_x, size_t nbp_y,
-    double niveau, double echelle, int relief){
-
-    size_t indice = 0;  //i*nbp_y + j
-
-    for (int i = 0; i < nbp_x; i++) {
-        for (int j = 0; j < nbp_y; j++) {
-            niveau += (rand()%relief*2) - relief + 1;
-            //g->tab_points[indice].x = i*echelle - (nbp_x*echelle/2);
-            //g->tab_points[indice].y = j*echelle - (nbp_y*echelle/2);
-            //g->tab_points[indice].z = niveau;
-            affecter_point3d(g->tab_points + indice,
-                i*echelle - (nbp_x*echelle/2),
-                j*echelle - (nbp_y*echelle/2),
-                niveau);
-            indice++;
-        }
+    double niveau, int relief)
+{
+    for (int i = 0; i < nbp_x*nbp_y; i++) {
+        niveau += (rand()%relief*2) - relief + 1;
+        g->tab_points[i].z += niveau;
     }
-    return quadrillage_terrain(g, nbp_x, nbp_y);
+    return g;
 }
 
 
 GrapheStatique3D* generation_spirale(GrapheStatique3D* g,
     size_t nbp_x, size_t nbp_y,
-    double niveau, double echelle, int relief){
-
+    double niveau, int relief)
+{
     size_t i=0, j=0;
     for (size_t k=0; k<(nbp_x/2)+1; k++) {
-        i=k;
-        j=k;
+        i=k; j=k;
+
         for (; j<nbp_x-k-1; j++) {
-            //printf("indice : %ld (i=%ld, j=%ld)\n", i*nbp_y + j, i,j);
             niveau += (rand()%relief*2) - relief + 1;
-            affecter_point3d(g->tab_points + (i*nbp_y + j),
-                i*echelle - (nbp_x*echelle/2),
-                j*echelle - (nbp_y*echelle/2),
-                niveau);
+            g->tab_points[i*nbp_y + j].z += niveau;
         }
         for (; i<nbp_y-k-1; i++) {
-            //printf("indice : %ld (i=%ld, j=%ld)\n", i*nbp_y + j, i,j);
             niveau += (rand()%relief*2) - relief + 1;
-            affecter_point3d(g->tab_points + (i*nbp_y + j),
-                i*echelle - (nbp_x*echelle/2),
-                j*echelle - (nbp_y*echelle/2),
-                niveau);
+            g->tab_points[i*nbp_y + j].z += niveau;
         }
         for (; j>k; j--) {
-            //printf("indice : %ld (i=%ld, j=%ld)\n", i*nbp_y + j, i,j);
             niveau += (rand()%relief*2) - relief + 1;
-            affecter_point3d(g->tab_points + (i*nbp_y + j),
-                i*echelle - (nbp_x*echelle/2),
-                j*echelle - (nbp_y*echelle/2),
-                niveau);
+            g->tab_points[i*nbp_y + j].z += niveau;
         }
         for (; i>k; i--) {
-            //printf("indice : %ld (i=%ld, j=%ld)\n", i*nbp_y + j, i,j);
             niveau += (rand()%relief*2) - relief + 1;
-            affecter_point3d(g->tab_points + (i*nbp_y + j),
-                i*echelle - (nbp_x*echelle/2),
-                j*echelle - (nbp_y*echelle/2),
-                niveau);
+            g->tab_points[i*nbp_y + j].z += niveau;
         }
-        //printf("------------------------------------------fin loop k=%ld\n", k);
     }
 
     if (nbp_x%2 != 0) {
         niveau += (rand()%relief*2) - relief + 1;
         i = nbp_x/2;
         j = nbp_y%2==0 ? nbp_y/2-1 : nbp_y/2;
-        printf("MILLIEU indexe : %ld\n", i*nbp_y + j);
-        affecter_point3d(g->tab_points + (i*nbp_y + j),
-            i*echelle - (nbp_x*echelle/2),
-            j*echelle - (nbp_y*echelle/2),
-            niveau);
+        g->tab_points[i*nbp_y + j].z = niveau;
     }
 
-    return quadrillage_terrain(g, nbp_x, nbp_y);
+    return g;
 }
 
 
@@ -141,7 +123,7 @@ GrapheStatique3D* generation_spirale(GrapheStatique3D* g,
 /*
  *  PERLIN NOISE
  *
- *  Merci à Raouf Touti pour ses explications claire sur son blog :
+ *  Merci notamment à Raouf Touti pour ses explications claire sur son blog :
  *  https://rtouti.github.io/graphics/perlin-noise-algorithm
  */
 
@@ -195,8 +177,8 @@ double get_scalaire_perlin_points(Vecteur2D v, int valeur){
 
 double bruit_perlin(double x, double y, int taillept, int* PT){
 
-    int X = (int)x & taillept;
-    int Y = (int)y & taillept;
+    int X = (int)x % taillept;
+    int Y = (int)y % taillept;
     double xf = x-X;
     double yf = y-Y;
 
@@ -228,27 +210,32 @@ double bruit_perlin(double x, double y, int taillept, int* PT){
 
 GrapheStatique3D* generation_bruit_perlin(GrapheStatique3D* g,
     size_t nbp_x, size_t nbp_y,
-    double niveau, double echelle, int relief,
+    double niveau, int relief,
     double frequence)
 {
     size_t indice = 0;  //i*nbp_y + j
 
-    size_t taillept = 255;
+    size_t taillept = 1024;
     int PT[taillept*2];
     creer_table_permutation(PT, taillept);
 
     for (int i = 0; i < nbp_x; i++) {
         for (int j = 0; j < nbp_y; j++) {
-            affecter_point3d(g->tab_points + indice,
-                i*echelle - (nbp_x*echelle/2),
-                j*echelle - (nbp_y*echelle/2),
-
-                bruit_perlin(i*frequence, j*frequence, taillept, PT)  *relief+niveau);
-
+            g->tab_points[indice].z += bruit_perlin(i*frequence, j*frequence, taillept, PT)  * relief + niveau;
             indice++;
         }
     }
-    return quadrillage_terrain(g, nbp_x, nbp_y);
+
+    /*creer_table_permutation(PT, taillept);
+    indice = 0;
+    for (int i = 0; i < nbp_x; i++) {
+        for (int j = 0; j < nbp_y; j++) {
+            g->tab_points[indice].z += bruit_perlin(i*frequence*5, j*frequence*5, taillept, PT)  * relief/2;
+            indice++;
+        }
+    }*/
+
+    return g;
 }
 
 

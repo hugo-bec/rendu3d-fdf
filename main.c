@@ -58,20 +58,16 @@ int main(int argc, char const *argv[])
 
 
 		//initialisation du terrain
-		size_t nbp_x = 100, nbp_y = 100;
-		GrapheStatique3D* terrain_stat = creer_graphe_statique(
-			nbp_x * nbp_y,
-			((nbp_x-1) * nbp_y) + ((nbp_y-1) * nbp_x) );
-		init0_graphe_statique(terrain_stat);
+		size_t nbp_x = 500, nbp_y = 500;
+		GrapheStatique3D* terrain = creer_terrain_plat(nbp_x, nbp_y, 50);
 
 		// formation du terrain
-		//generation_double_boucle(terrain_stat, nbp_x, nbp_y, 0, 50, 50);
-		//generation_spirale(terrain_stat, nbp_x, nbp_y, 0, 50, 20);
-		//generation_random(terrain_stat, nbp_x, nbp_y, 0, 50, 100);
-		generation_bruit_perlin(terrain_stat, nbp_x, nbp_y, 0,
-			50,		//echelle
-			500,	//relief
-			0.05);	//frequence
+		//generation_double_boucle(terrain, nbp_x, nbp_y, 0, 50, 50);
+		//generation_spirale(terrain, nbp_x, nbp_y, 0, 50, 20);
+		//generation_random(terrain, nbp_x, nbp_y, 0, 100);
+		generation_bruit_perlin(terrain, nbp_x, nbp_y, 0 /*niveau*/, 1500 /*relief*/, 0.02 /*frequence*/);
+		generation_bruit_perlin(terrain, nbp_x, nbp_y, 0 /*niveau*/, 400 /*relief*/, 0.10 /*frequence*/);
+		generation_bruit_perlin(terrain, nbp_x, nbp_y, 0 /*niveau*/, 100 /*relief*/, 0.30 /*frequence*/);
 
 
 		update_cam();
@@ -127,9 +123,8 @@ int main(int argc, char const *argv[])
 
 
 
-			//afficher_points(&terrain,  4, 128, 255, 0);
-			//afficher_points_gstat(terrain_stat, 4, 128,255,0);
-			afficher_aretes_gstat(terrain_stat, 1, 128,255,0);
+			afficher_points_gstat(terrain, 1, 128,255,0);
+			//afficher_aretes_gstat(terrain, 1, 128,255,0);
 
 			//afficher_aretes(&pyramide,  4, 255,255,0);
 			//afficher_aretes(&prisme,  4, 0,128,255);

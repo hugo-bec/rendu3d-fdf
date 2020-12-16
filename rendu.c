@@ -162,7 +162,15 @@ void afficher_aretes_gstat(GrapheStatique3D* g, int epaisseur, int r, int v, int
 	}
 }
 
-
+/*void afficher_couleur_relief(GrapheStatique3D* g, int epaisseur, int zmin, int zmax){
+	int deltaz = zmax - zmin;
+	for (Point3D* p = g->tab_points; p < g->tab_points + g->nbPoints-1; p++) {
+		if (p->z < zmin + (deltaz/4)) {
+			afficher_point(p, epaisseur, r,v,b);
+		}
+		//afficher_point(p, epaisseur, r,v,b);
+	}
+}*/
 
 
 

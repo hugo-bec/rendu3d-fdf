@@ -217,6 +217,12 @@ void afficher_couleur_relief_points(GrapheStatique3D* g, int epaisseur, int zmin
 
 
 
+/*
+ * RENDU COMPTEUR FPS
+ */
+
+
+
 
 /*
  *	BRENSENHAM

@@ -5,6 +5,8 @@
 void print_point(Point3D* p);
 void print_graphe(Graphe3D* g);
 
+
+// Graphe dynamique
 void* get_noeud_element(Noeud* n, size_t i);
 void* ajout_element(Noeud* n, void* vp_elem);
 

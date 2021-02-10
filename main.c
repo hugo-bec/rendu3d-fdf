@@ -8,21 +8,30 @@
 
 #include "constantes.h"
 #include "struct.h"
-#include "graphe.h"
 #include "rendu.h"
+#include "graphe.h"
 #include "vecteur3d.h"
 #include "generation_terrain.h"
 
 
 
-
+/*
+ * variables globales init dans rendu.c :
+ */
+//SDL
 extern SDL_Window* pWindow;
 extern SDL_Renderer* renderer;
 
+//SDL Texture
+extern Uint32 *pixels;
+extern void *tmp;
+extern int pitch;
+extern SDL_Texture *texture;
+
+//Caméra
 extern double rayon;
 extern double alpha, beta;
 
-extern Uint32 *pixels;
 
 
 
@@ -35,42 +44,8 @@ int main(int argc, char const *argv[])
 
 	if(init_sdl()) {
 		init_renderer();
+		init_texture();
 		SDL_RenderClear(renderer);
-
-		//update_cam();
-
-
-			/*SDL_Surface* surface = SDL_CreateRGBSurface(0, LARGEUR_FENETRE, HAUTEUR_FENETRE, 32, 0, 0, 0, 0);
-			if(surface == NULL) {
-			    printf("Erreur lors de la creation de la surface: %s", SDL_GetError());
-			    return EXIT_FAILURE;
-			}
-
-			if(SDL_SetSurfaceRLE(surface, 1)){	//activation de la compression Run-length encoding
-				printf("Erreur lors de l'activation de la compression RLE: %s", SDL_GetError());
-			    return EXIT_FAILURE;
-			}*/
-
-			void *tmp;
-			SDL_PixelFormat *format;
-			int pitch;
-			SDL_Texture *texture;
-
-			Point2D pa[10];
-			Point2D pb = {100, 100};
-
-			unsigned int valrgba = 3999999999;
-			unsigned int coordxy = 0;
-
-			texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
-                            LARGEUR_FENETRE, HAUTEUR_FENETRE); /* On devrait vérifier que la fonction a réussi */
-			format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
-			SDL_LockTexture(texture, NULL, &tmp, &pitch);
-
-			pixels = tmp;
-			pixels[5] = 3999999999;
-
-			SDL_UnlockTexture(texture);
 
 
 		int mx, my;
@@ -105,10 +80,7 @@ int main(int argc, char const *argv[])
 		generation_bruit_perlin(terrain, nbp_x, nbp_y, 0 /*niveau*/, 400 /*relief*/, 0.10 /*frequence*/);
 		generation_bruit_perlin(terrain, nbp_x, nbp_y, 0 /*niveau*/, 100 /*relief*/, 0.30 /*frequence*/);
 
-
-		//update_cam();
-		//SDL_SetRenderDrawColor(renderer, 0, 0, 0,   255);
-		//SDL_RenderPresent(renderer);
+		
 
 		while (!quit) {
 			while (SDL_PollEvent(&event)){
@@ -179,7 +151,7 @@ int main(int argc, char const *argv[])
 		//freeNoeud
 
 		//SDL_FreeSurface(surface);
-		SDL_FreeFormat(format);
+		SDL_DestroyTexture(texture);
 
 		SDL_DestroyWindow(pWindow);
 	}

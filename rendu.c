@@ -9,23 +9,27 @@
 #include "vecteur3d.h"
 
 
-
+//SDL
 SDL_Window* pWindow;
 SDL_Renderer* renderer;
 
+//SDL texture
 Uint32 *pixels;
+void *tmp;
+int pitch;
+SDL_Texture *texture;
 
-double rayon = 1000;
-double alpha = 0, beta = 0;
-
+//repère cartesien
 Point3D origine = {0, 0, 0};
 Vecteur3D v_cartesien_x = {1, 0, 0};
 Vecteur3D v_cartesien_y = {0, 1, 0};
 Vecteur3D v_cartesien_z = {0, 0, 1};
 
-Vecteur3D vcam,
-	vplan_cam_i, vplan_cam_j;
+//camera
+Vecteur3D vcam, vplan_cam_i, vplan_cam_j;
 Point3D pcam;
+double rayon = 1000;
+double alpha = 0, beta = 0;
 
 
 
@@ -56,6 +60,18 @@ void init_renderer(){
        printf("Erreur lors de la creation d'un renderer : %s",SDL_GetError());
        exit(EXIT_FAILURE);
     }
+}
+
+void init_texture(){
+	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+					LARGEUR_FENETRE, HAUTEUR_FENETRE); /* On devrait vérifier que la fonction a réussi */
+	if(texture == NULL) {
+       printf("Erreur lors de la creation de la texture : %s",SDL_GetError());
+       exit(EXIT_FAILURE);
+    }
+	SDL_LockTexture(texture, NULL, &tmp, &pitch);
+	pixels = tmp;
+	SDL_UnlockTexture(texture);
 }
 
 
@@ -98,7 +114,7 @@ void update_cam(){
 
 
 
-void afficher_point2Dv0(Point2D* p, int epaisseur, int r, int g, int b){
+void afficher_point2Dv1(Point2D* p, int epaisseur, int r, int g, int b){
 	SDL_SetRenderDrawColor(renderer, r, g, b,   255);
 	if (epaisseur <= 1) {
 		epaisseur=1;

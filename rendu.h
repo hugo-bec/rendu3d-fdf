@@ -10,7 +10,7 @@
 //SDL
 SDL_Window* init_sdl();
 void init_renderer();
-
+void init_texture();
 
 //RENDU ECRAN
 void calculer_vecteurs_plancam();
@@ -32,7 +32,7 @@ void afficher_aretes_gstat(GrapheStatique3D* g, int epaisseur, int r, int v, int
 
 void afficher_couleur_relief_points(GrapheStatique3D* g, int epaisseur, int zmin, int zmax);
 
-
+//Tracé de segments
 void bresenham(Point2D* p1, Point2D* p2, int epaisseur, int r, int g, int b);
 
 

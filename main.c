@@ -22,6 +22,7 @@ extern SDL_Renderer* renderer;
 extern double rayon;
 extern double alpha, beta;
 
+extern Uint32 *pixels;
 
 
 
@@ -36,7 +37,41 @@ int main(int argc, char const *argv[])
 		init_renderer();
 		SDL_RenderClear(renderer);
 
-		update_cam();
+		//update_cam();
+
+
+			/*SDL_Surface* surface = SDL_CreateRGBSurface(0, LARGEUR_FENETRE, HAUTEUR_FENETRE, 32, 0, 0, 0, 0);
+			if(surface == NULL) {
+			    printf("Erreur lors de la creation de la surface: %s", SDL_GetError());
+			    return EXIT_FAILURE;
+			}
+
+			if(SDL_SetSurfaceRLE(surface, 1)){	//activation de la compression Run-length encoding
+				printf("Erreur lors de l'activation de la compression RLE: %s", SDL_GetError());
+			    return EXIT_FAILURE;
+			}*/
+
+			void *tmp;
+			SDL_PixelFormat *format;
+			int pitch;
+			SDL_Texture *texture;
+
+			Point2D pa[10];
+			Point2D pb = {100, 100};
+
+			unsigned int valrgba = 3999999999;
+			unsigned int coordxy = 0;
+
+			texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+                            LARGEUR_FENETRE, HAUTEUR_FENETRE); /* On devrait vérifier que la fonction a réussi */
+			format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+			SDL_LockTexture(texture, NULL, &tmp, &pitch);
+
+			pixels = tmp;
+			pixels[5] = 3999999999;
+
+			SDL_UnlockTexture(texture);
+
 
 		int mx, my;
 		Point2D proj1, proj2;
@@ -58,21 +93,22 @@ int main(int argc, char const *argv[])
 
 
 		//initialisation du terrain
-		size_t nbp_x = 500, nbp_y = 500;
+		size_t nbp_x = 200, nbp_y = 200;
 		GrapheStatique3D* terrain = creer_terrain_plat(nbp_x, nbp_y, 50);
 
 		// formation du terrain
 		//generation_double_boucle(terrain, nbp_x, nbp_y, 0, 50, 50);
 		//generation_spirale(terrain, nbp_x, nbp_y, 0, 50, 20);
 		//generation_random(terrain, nbp_x, nbp_y, 0, 100);
+
 		generation_bruit_perlin(terrain, nbp_x, nbp_y, 0 /*niveau*/, 1500 /*relief*/, 0.02 /*frequence*/);
 		generation_bruit_perlin(terrain, nbp_x, nbp_y, 0 /*niveau*/, 400 /*relief*/, 0.10 /*frequence*/);
 		generation_bruit_perlin(terrain, nbp_x, nbp_y, 0 /*niveau*/, 100 /*relief*/, 0.30 /*frequence*/);
 
 
-		update_cam();
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0,   255);
-		SDL_RenderPresent(renderer);
+		//update_cam();
+		//SDL_SetRenderDrawColor(renderer, 0, 0, 0,   255);
+		//SDL_RenderPresent(renderer);
 
 		while (!quit) {
 			while (SDL_PollEvent(&event)){
@@ -85,19 +121,19 @@ int main(int argc, char const *argv[])
 						switch( event.key.keysym.sym )
                         {
 							case SDLK_UP:
-								alpha += 0.05;
+								alpha += 0.1;
 								update_cam();
 								break;
 							case SDLK_DOWN:
-								alpha -= 0.05;
+								alpha -= 0.1;
 								update_cam();
 								break;
 							case SDLK_LEFT:
-								beta += 0.05;
+								beta += 0.1;
 								update_cam();
 								break;
 							case SDLK_RIGHT:
-								beta -= 0.05;
+								beta -= 0.1;
 								update_cam();
 								break;
 						}
@@ -120,19 +156,30 @@ int main(int argc, char const *argv[])
 			}
 
 			SDL_RenderClear(renderer);
+			memset(pixels, 0, LARGEUR_FENETRE * HAUTEUR_FENETRE * sizeof(Uint32));
 
+			SDL_LockTexture(texture, NULL, &tmp, &pitch);
 
-
-			afficher_points_gstat(terrain, 1, 128,255,0);
-			//afficher_aretes_gstat(terrain, 1, 128,255,0);
+			//afficher_points_gstat(terrain, 1, 128,255,0);
+			//afficher_couleur_relief_points(terrain, 2, -750, 750);
+			afficher_aretes_gstat(terrain, 1, 128,255,0);
 
 			//afficher_aretes(&pyramide,  4, 255,255,0);
 			//afficher_aretes(&prisme,  4, 0,128,255);
 
+			SDL_UnlockTexture(texture);
+
+			SDL_RenderCopy(renderer, texture, NULL, NULL);
 			SDL_RenderPresent(renderer);
+
+
+
 		}
 
 		//freeNoeud
+
+		//SDL_FreeSurface(surface);
+		SDL_FreeFormat(format);
 
 		SDL_DestroyWindow(pWindow);
 	}

@@ -30,6 +30,8 @@ void afficher_aretes(Graphe3D* g, int epaisseur, int r, int v, int b);
 void afficher_points_gstat(GrapheStatique3D* g, int epaisseur, int r, int v, int b);
 void afficher_aretes_gstat(GrapheStatique3D* g, int epaisseur, int r, int v, int b);
 
+void afficher_couleur_relief_points(GrapheStatique3D* g, int epaisseur, int zmin, int zmax);
+
 
 void bresenham(Point2D* p1, Point2D* p2, int epaisseur, int r, int g, int b);
 

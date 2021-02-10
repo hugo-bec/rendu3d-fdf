@@ -13,6 +13,8 @@
 SDL_Window* pWindow;
 SDL_Renderer* renderer;
 
+Uint32 *pixels;
+
 double rayon = 1000;
 double alpha = 0, beta = 0;
 
@@ -94,7 +96,9 @@ void update_cam(){
 	calculer_vecteurs_plancam();
 }
 
-void afficher_point2D(Point2D* p, int epaisseur, int r, int g, int b){
+
+
+void afficher_point2Dv0(Point2D* p, int epaisseur, int r, int g, int b){
 	SDL_SetRenderDrawColor(renderer, r, g, b,   255);
 	if (epaisseur <= 1) {
 		epaisseur=1;
@@ -108,18 +112,30 @@ void afficher_point2D(Point2D* p, int epaisseur, int r, int g, int b){
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0,   255);
 }
 
+void afficher_point2D(Point2D* p, int epaisseur, int r, int g, int b){
+	//printf("a\n");
+	//printf("p %x\n", r<<24 | g<<16 | b<<8 | 255<<0);
+	//pixels[5] = 3999999999;
+	if (p->y >= 0 && p->y < HAUTEUR_FENETRE && p->x >= 0 && p->x < LARGEUR_FENETRE) {
+		pixels[p->y * LARGEUR_FENETRE + p->x] = r<<24 | g<<16 | b<<8 | 255<<0;
+	}
+}
+
 
 
 
 /*
  * RENDU GRAPHES
  */
+ //optimisation à faire si point3d n'est pas dans l'angle de la camera
 void afficher_point(Point3D* p, int epaisseur, int r, int v, int b){
 	Point2D proj;
 	proj_point( p, &proj);
 	afficher_point2D(&proj, epaisseur, r,v,b);
 }
 
+ //optimisation à faire si a->p1 && a->p2 tout deux à doite ou à gauche ou en
+ //haut ou en bas hors du champ de la cam
 void afficher_arete(Arete3D* a, int epaisseur, int r, int v, int b){
 	Point2D proj1, proj2;
 	proj_point( a->p1 , &proj1 );
@@ -162,15 +178,26 @@ void afficher_aretes_gstat(GrapheStatique3D* g, int epaisseur, int r, int v, int
 	}
 }
 
-/*void afficher_couleur_relief(GrapheStatique3D* g, int epaisseur, int zmin, int zmax){
+
+// rendre cette fonction plus parametrable
+void afficher_couleur_relief_points(GrapheStatique3D* g, int epaisseur, int zmin, int zmax){
 	int deltaz = zmax - zmin;
 	for (Point3D* p = g->tab_points; p < g->tab_points + g->nbPoints-1; p++) {
-		if (p->z < zmin + (deltaz/4)) {
-			afficher_point(p, epaisseur, r,v,b);
+		if (p->z <= zmin + (deltaz/3)) {
+			afficher_point(p, epaisseur, 0, 255, 255);
+		}
+		else if (p->z > zmin + (deltaz/3) && p->z <= zmin + (deltaz/2)) {
+			afficher_point(p, epaisseur, 255, 255, 0);
+		}
+		else if (p->z > zmin + (deltaz/2) && p->z <= zmin + (deltaz/2)+(deltaz/4)+(deltaz/8)) {
+			afficher_point(p, epaisseur, 0, 255, 0);
+		}
+		else {
+			afficher_point(p, epaisseur, 255, 255, 255);
 		}
 		//afficher_point(p, epaisseur, r,v,b);
 	}
-}*/
+}
 
 
 
@@ -298,21 +325,23 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
                     (p1.x -= 1);
                 }
             }
-        } else {    //dx == 0
-            dy = p2.y - p1.y;
-            if (dy != 0) {
-                if (dy > 0) {
-                    while (p1.y != p2.y) {
-                        afficher_point2D(&p1, epaisseur, r,g,b);
-                        (p1.y -= 1);
-                    }
-                } else {
-                    while (p1.y != p2.y) {
-                        afficher_point2D(&p1, epaisseur, r,g,b);
-                        (p1.y += 1);
-                    }
-                }
-            }
         }
-    }
+    } else {	//dx == 0
+		dy = p2.y - p1.y;
+		if (dy != 0) {
+			if (dy > 0) {
+				while (p1.y != p2.y) {
+					afficher_point2D(&p1, epaisseur, r,g,b);
+					(p1.y += 1);
+				}
+			} else {
+				while (p1.y != p2.y) {
+					afficher_point2D(&p1, epaisseur, r,g,b);
+					(p1.y -= 1);
+				}
+			}
+		} else {
+			afficher_point2D(&p1, epaisseur, r,g,b);
+		}
+	}
 }

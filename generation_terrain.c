@@ -6,6 +6,7 @@
 #include "struct.h"
 #include "graphe.h"
 #include "vecteur3d.h"
+#include "vecteur2d.h"
 
 
 
@@ -159,19 +160,19 @@ double get_scalaire_perlin_points(Vecteur2D v, int valeur){
         case 0:
             vect_const.x = 1;
             vect_const.y = 1;
-            return scalaire2D(v, vect_const);
+            return scalaire2D(&v, &vect_const);
         case 1:
             vect_const.x = -1;
             vect_const.y = 1;
-            return scalaire2D(v, vect_const);
+            return scalaire2D(&v, &vect_const);
         case 2:
             vect_const.x = -1;
             vect_const.y = -1;
-            return scalaire2D(v, vect_const);
+            return scalaire2D(&v, &vect_const);
         default:
             vect_const.x = 1;
             vect_const.y = -1;
-            return scalaire2D(v, vect_const);
+            return scalaire2D(&v, &vect_const);
     }
 }
 

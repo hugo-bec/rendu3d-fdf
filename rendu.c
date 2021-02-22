@@ -7,6 +7,7 @@
 #include "constantes.h"
 #include "struct.h"
 #include "vecteur3d.h"
+#include "vecteur2d.h"
 
 
 //SDL
@@ -33,7 +34,8 @@ double alpha = 0, beta = 0;
 
 
 
-void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b);     //je le laisse en bas
+void afficher_arete(Arete3D* a, int epaisseur, int r, int v, int b);
+void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b);     //je les laisse en bas
 
 
 SDL_Window* init_sdl(){
@@ -150,17 +152,6 @@ void afficher_point(Point3D* p, int epaisseur, int r, int v, int b){
 	afficher_point2D(&proj, epaisseur, r,v,b);
 }
 
- //optimisation à faire si a->p1 && a->p2 tout deux à doite ou à gauche ou en
- //haut ou en bas hors du champ de la cam
-void afficher_arete(Arete3D* a, int epaisseur, int r, int v, int b){
-	Point2D proj1, proj2;
-	proj_point( a->p1 , &proj1 );
-	proj_point( a->p2 , &proj2 );
-	bresenham(&proj1, &proj2, epaisseur, r,v,b);
-}
-
-
-
 void afficher_points(Graphe3D* g, int epaisseur, int r, int v, int b){
 	Noeud* ni = g->point_tete;
 	while (ni != NULL) {
@@ -214,12 +205,410 @@ void afficher_couleur_relief_points(GrapheStatique3D* g, int epaisseur, int zmin
 		//afficher_point(p, epaisseur, r,v,b);
 	}
 }
+void afficher_arete0(Arete3D* a, int epaisseur, int r, int v, int b){
+	Point2D proj1, proj2 ;//= {500, 6000};//= {500, -400}
+	proj_point( a->p1 , &proj1 );
+	proj_point( a->p2 , &proj2 );
+
+    bresenham(&proj1, &proj2, epaisseur, r,v,b);
+}
+
+void afficher_arete02(Arete3D* a, int epaisseur, int r, int v, int b){
+	Point2D proj1, proj2 ;//= {500, 6000};//= {500, -400}
+	proj_point( a->p1 , &proj1 );
+	proj_point( a->p2 , &proj2 );
+
+    if (proj1.x < 0 && proj2.x < 0) {
+        if (proj1.x > LARGEUR_FENETRE && proj2.x > LARGEUR_FENETRE) {
+            if (proj1.y < 0 && proj2.y < 0) {
+                if (proj1.y > HAUTEUR_FENETRE && proj2.y > HAUTEUR_FENETRE) {
+                    return;
+                }
+                else {
+                    bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                }
+            }
+            else {
+                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+            }
+        }
+        else {
+            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+        }
+    } else {
+        bresenham(&proj1, &proj2, epaisseur, r,v,b);
+    }
 
 
+}
 
-/*
- * RENDU COMPTEUR FPS
- */
+void afficher_arete(Arete3D* a, int epaisseur, int r, int v, int b){
+	Point2D proj1, proj2 ;//= {500, 6000};//= {500, -400}
+	proj_point( a->p1 , &proj1 );
+	proj_point( a->p2 , &proj2 );
+
+    //bresenham(&proj1, &proj2, epaisseur, r,v,b);
+
+    //if (proj1.x == proj2.x) { bresenham(&proj1, &proj2, epaisseur, r,v,b); return; }
+
+	if (proj1.x >= 0) {
+		if (proj1.x < LARGEUR_FENETRE) {    //+1 et -1 pour éviter des divisions par zero par la suite
+			//p1 PARTIE CENTRE
+			if (proj1.y >= 0) {
+				if (proj1.y < HAUTEUR_FENETRE) {
+					bresenham(&proj1, &proj2, epaisseur, r,v,b);
+				} else {
+					//p1 CENTRE BAS
+
+                    if (proj2.y < HAUTEUR_FENETRE) {
+                        if (proj2.x >= 0) {
+    						if (proj2.x < LARGEUR_FENETRE) {
+    							bresenham(&proj1, &proj2, epaisseur, r,v,b);
+    						} else {
+    							//p2 PARTIE DROITE
+    							/*double coefdir_coin = (proj1.y-HAUTEUR_FENETRE)/(LARGEUR_FENETRE-proj1.x);
+    							double coefdir_segment = (proj1.y - proj2.y)/(proj2.x - proj1.x);
+    							if (coefdir_segment > coefdir_coin) {
+    								bresenham(&proj1, &proj2, epaisseur, r,v,b);
+    							}
+                                else { return; }*/
+
+                                int coef_coin = (proj1.y-HAUTEUR_FENETRE)*(proj2.x - proj1.x);
+                                //(A*B)-> si A=0: p2.y<HF donc s'affiche, si B=0: impossible car proj2.x>LF
+                                int coef_segment = (proj1.y - proj2.y)*(LARGEUR_FENETRE-proj1.x);
+                                //(C*D)-> si C=0: impossible car p2.y<HF, si D=0: impossible car p1.x<LF
+                                if (coef_segment >= coef_coin) {
+                                    bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                                }
+                                else { return; }
+
+    						}
+    					} else {
+    						//p2 PARTIE GAUCHE
+    						/*double coefdir_coin = (proj1.y - HAUTEUR_FENETRE)/proj1.x;
+    						double coefdir_segment = (proj1.y - proj2.y)/(proj1.x - proj2.x);
+    						if (coefdir_segment > coefdir_coin) {
+    							bresenham(&proj1, &proj2, epaisseur, r,v,b);
+    						}
+                            else { return; }*/
+
+                            int coef_coin = (proj1.y-HAUTEUR_FENETRE)*(proj1.x - proj2.x);
+                            //(A*B)-> si A=0: p2.y<HF donc afficher, si B=0: p2.y<HF donc afficher
+                            int coef_segment = (proj1.y - proj2.y)*proj1.x;
+                            //(C*D)-> si C=0: impossible car p2.y<HF, si D=0: ne s'affiche pas car p2.x<0
+                            if (coef_segment >= coef_coin) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }
+
+    					}
+                    }
+                    else { return; }
+
+				}
+			} else {
+				//p1 CENTRE HAUT
+
+                if (proj2.y >= 0) {
+                    if (proj2.x >= 0) {
+                        if (proj2.x < LARGEUR_FENETRE) {
+                            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                        } else {
+                            //p2 PARTIE DROITE
+                            /*double coefdir_coin = -proj1.y/(LARGEUR_FENETRE - proj1.x);
+                            double coefdir_segment = (proj2.y - proj1.y)/(proj2.x - proj1.x);
+                            if (coefdir_segment > coefdir_coin) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }*/
+
+                            int coef_coin = -proj1.y*(proj2.x - proj1.x);
+                            //(A*B)-> si A=0: impossible car p1.y<0, si B=0: impossible car p2.x>LF et p1.x au centre
+                            int coef_segment = (proj2.y - proj1.y)*(LARGEUR_FENETRE - proj1.x);
+                            //(C*D)-> si C=0: impossible car p2.y>=0 et p1.y<0, D=0: ne s'affiche pas
+                            if (coef_segment >= coef_coin) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }
+
+                        }
+                    } else {
+                        //p2 PARTIE GAUCHE
+                        /*double coefdir_coin = -proj1.y/proj1.x;
+                        double coefdir_segment = (proj2.y-proj1.y)/(proj1.x-proj2.x);
+                        if (coefdir_segment > coefdir_coin) {
+                            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                        }
+                        else { return; }*/
+
+                        int coef_coin = -proj1.y*(proj1.x-proj2.x);
+                        //(A*B)-> si A=0: impossible car p1.y<0, si B=0: impossible car p2.x<0 et p1.x>=0
+                        int coef_segment = (proj2.y-proj1.y)*proj1.x;
+                        //(C*D)-> si C=0: impossible car p2.y>=0 et p1.y<0, D=0: ne pas afficher car p2.x<0
+                        if (coef_segment >= coef_coin) {
+                            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                        }
+                        else { return; }
+
+                    }
+                }
+                else { return; }
+
+			}
+		} else {
+			//p1 PARTIE DROITE
+            //if (proj1.x == proj2.x) { return; }
+
+            if (proj2.x < LARGEUR_FENETRE) {
+                if (proj1.y >= 0) {
+                    if (proj1.y < HAUTEUR_FENETRE) {
+                        //p1 AU MILIEU A DROITE
+
+                        /*if (proj2.y >= 0 && proj2.y < HAUTEUR_FENETRE) {
+                            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                        } else {*/
+                            if (proj2.y < 0) {
+                                /*double coefdir_coin_haut = proj1.y/(proj1.x-LARGEUR_FENETRE);
+                                double coefdir_segment = -proj2.y/(proj1.x-proj2.x);
+                                if (coefdir_coin_haut > coefdir_segment) {
+                                    bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                                }
+                                else { return; }*/
+
+                                int coef_coin_haut = proj1.y*(proj1.x-proj2.x);
+                                //(A*B)-> si A=0: ne s'affiche pas (inutile car p2.y<0),
+                                //B=0: impossible car p2.x<LF et p1.x>=LF
+                                int coef_segment = -proj2.y*(proj1.x-LARGEUR_FENETRE);
+                                //(C*D)-> si C=0: impossible car p2.y<0, D=0: s'affiche
+                                if (coef_segment <= coef_coin_haut) {
+                                    bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                                }
+                                else { return; }
+
+                            } else if (proj2.y < HAUTEUR_FENETRE) {
+                                /*double coefdir_coin_bas = (HAUTEUR_FENETRE-proj1.y)/(proj1.x-LARGEUR_FENETRE);
+                                double coefdir_segment = (HAUTEUR_FENETRE-proj2.y)/(proj1.x-proj2.x);
+                                if (coefdir_coin_bas > coefdir_segment) {
+                                    bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                                }
+                                else { return; }*/
+
+                                int coef_coin_bas = (HAUTEUR_FENETRE-proj1.y)*(proj1.x-proj2.x);
+                                //(A*B)-> si A=0: ne s'affiche pas (inutile car p2.y>HF)
+                                //B=0: impossible car p2.x<LF et p1.x>=LF
+                                int coef_segment = (HAUTEUR_FENETRE-proj2.y)*(proj1.x-LARGEUR_FENETRE);
+                                //(C*D)-> si C=0: s'affiche, D=0: s'affche
+                                if (coef_segment <= coef_coin_bas) {
+                                    bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                                }
+                                else { return; }
+
+                            } else {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                        //}
+
+                    } else {
+                        //p1 EN BAS A DROITE
+
+                        if (proj2.y < HAUTEUR_FENETRE+1) {
+                            /*double coefdir_coin_haut = proj1.y/(proj1.x-LARGEUR_FENETRE);
+                            double coefdir_coin_bas = (proj1.y-HAUTEUR_FENETRE)/proj1.x;
+                            double coefdir_segment = (proj1.y-proj2.y)/(proj1.x-proj2.x);
+                            if (coefdir_coin_bas < coefdir_segment
+                                && coefdir_coin_haut > coefdir_segment) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }*/
+
+                            int coef_coin_haut = proj1.y*(proj1.x-proj2.x);
+                            //(A*B) -> si A=0: impossible car p1.y<HF,
+                            //B=0: impossible car p2.x<LF et p1.x >= LF
+                            int coef_segment = (proj1.y-proj2.y)*(proj1.x-LARGEUR_FENETRE);
+                            //(C*D) -> si C=0: impossible car p1.y>=HF et p2.y<HF
+                            //D=0: doit s'afficher dans n'importe quel cas donc OK
+                            if (coef_coin_haut >= coef_segment) {
+
+                                int coef_coin_bas = (proj1.y-HAUTEUR_FENETRE)*(proj1.x-proj2.x);
+                                //(A*B) -> si A=0: doit s'afficher car coef_coin_haut >= coef_segment donc OK
+                                //B=0: impossible car p2.x<LF et p1.x >= LF
+                                coef_segment = (proj1.y-proj2.y)*proj1.x;
+                                //(C*D) -> si C=0: impossible car p1.y>=HF et p2.y<HF, D=0: impossible car p1.x>LF
+                                if (coef_coin_bas <= coef_segment) {
+                                    bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                                }
+                                else { return; }
+                            }
+                            else { return; }
+                        }
+                        else { return; }
+
+                    }
+                } else {
+                    //p1 EN HAUT A DROITE
+
+                    if (proj2.y >= 0) {
+                        /*double coefdir_coin_haut = -proj1.y/proj1.x;
+                        double coefdir_coin_bas = (HAUTEUR_FENETRE-proj1.y)/(proj1.x-LARGEUR_FENETRE);
+                        double coefdir_segment = (proj2.y-proj1.y)/(proj1.x-proj2.x);
+                        if (coefdir_coin_haut < coefdir_segment
+                            && coefdir_coin_bas > coefdir_segment) {
+                            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                        }
+                        else { return; }*/
+
+                        int coef_coin_haut = -proj1.y*(proj1.x-LARGEUR_FENETRE);
+                        //(A*B) -> si A=0: impossible car p1.y<0, B=0: s'affiche même si peut ne pas l'être
+                        int coef_segment = (HAUTEUR_FENETRE-proj1.y)*proj1.x;
+                        //(C*D) -> si C=0: impossible car p1.y<0, D=0: impossible car p1.x>LF
+                        if (coef_coin_haut <= coef_segment) {
+                            int coef_coin_bas = (HAUTEUR_FENETRE-proj1.y)*(proj1.x-proj2.x);
+                            //(A*B) -> si A=0: impossibla car p1.y<0, B=0: impossible car p1.x>=LF et p2.x<LF
+                            coef_segment = (proj2.y-proj1.y)*(proj1.x-LARGEUR_FENETRE);
+                            //(C*D) -> si C=0: impossible car p1.y<0 et p2.y>=0,
+                            //D=0: doit s'afficher car coef_coin_haut <= coef_segment
+                            if (coef_coin_bas >= coef_segment) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }
+                        }
+                        else { return; }
+                    }
+                    else { return; }
+
+                }
+            }
+            else { return; }
+		}
+	} else {
+		//p1 PARTIE GAUCHE
+        //if (proj1.x == proj2.x) { return; }
+
+        if (proj2.x >= 0) {
+            if (proj1.y >= 0) {
+                if (proj1.y < HAUTEUR_FENETRE) {
+                    //p1 AU MILIEU A GAUCHE
+
+                    /*if (proj2.y >= 0 && proj2.y < HAUTEUR_FENETRE) {
+                        bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                    } else {*/
+                        if (proj2.y < 0) {
+                            /*double coefdir_coin_haut = proj1.y/-proj1.x;
+                            double coefdir_segment = (proj1.y-proj2.y)/(proj2.x-proj1.x);
+                            if (coefdir_coin_haut > coefdir_segment) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }*/
+
+                            int coef_coin_haut = proj1.y*(proj2.x-proj1.x);
+                            //(A*B) -> si A=0: ne s'affiche pas donc OK (car p2.y<0)
+                            //B=0: impossible car p1.x<0 et p2.x>=0
+                            int coef_segment = (proj1.y-proj2.y)*-proj1.x;
+                            //(C*D) -> si C=0: impossible car p1.y>=0 et p2.y<0,
+                            //D=0: s'affiche dans tout les cas donc OK
+                            if (coef_coin_haut >= coef_segment) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }
+
+                        } else if (proj2.y < HAUTEUR_FENETRE) {
+                            /*double coefdir_coin_bas = (HAUTEUR_FENETRE-proj1.y)/-proj1.x;
+                            double coefdir_segment = (proj2.y-proj1.y)/(proj2.x-proj1.x);
+                            if (coefdir_coin_bas > coefdir_segment) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }*/
+
+                            int coef_coin_bas = (HAUTEUR_FENETRE-proj1.y)*(proj2.x-proj1.x);
+                            //(A*B) -> si A=0: impossible car p1.y<HF, B=0: impossible car p2.x>=0 et p1.x<0
+                            int coef_segment = (proj2.y-proj1.y)*-proj1.x;
+                            //(C*D) -> si C=0: impossibel car p2.y>=HF et p1.y<HF
+                            //D=0: s'affiche même si peut ne pas l'être
+                            if (coef_coin_bas >= coef_segment) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }
+                        } else {
+                            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                        }
+                    //}
+
+                }
+                else {
+                    //p1 EN BAS A GAUCHE
+
+                    if (proj2.y < HAUTEUR_FENETRE) {
+                        /*double coefdir_coin_haut = proj1.y/-proj1.x;
+                        double coefdir_coin_bas = (proj1.y-HAUTEUR_FENETRE)/(LARGEUR_FENETRE-proj1.x);
+                        double coefdir_segment = (proj1.y-proj2.y)/(proj2.x-proj1.x);
+                        if (coefdir_coin_haut > coefdir_segment
+                            && coefdir_coin_bas < coefdir_segment) {
+                            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                        }
+                        else { return; }*/
+
+                        int coef_coin_haut = proj1.y*(proj2.x-proj1.x);
+                        //(A*B) -> si A=0: impossible car p1.y>HF, B=0: impossible car p2.x>=0 et p1.x<0
+                        int coef_segment = (proj1.y-proj2.y)*(-proj1.x);
+                        //(C*D) -> si C=0: impossibla car p2.y<HF et p1.y>=HF,
+                        //D=0: s'affiche même si peut ne pas l'être
+                        if (coef_coin_haut >= coef_segment) {
+
+                            int coef_coin_bas = (proj1.y-HAUTEUR_FENETRE)*(proj2.x-proj1.x);
+                            //(A*B) -> si A=0: s'affiche donc OK (car p2.y<HF et coef_coin_haut >= coef_segment)
+                            //B=0: impossible car p2.x>=0 et p1.x<0
+                            coef_segment = (proj1.y-proj2.y)*(LARGEUR_FENETRE-proj1.x);
+                            //(C*D) -> si C=0: impossibla car p2.y<HF et p1.y>=HF, D=0: impossible car p1.x<0
+                            if (coef_coin_bas <= coef_segment) {
+                                bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                            }
+                            else { return; }
+                        }
+                        else { return; }
+
+                    }
+                    else { return; }
+
+                }
+            }
+            else {
+                //p1 EN HAUT A GAUCHE
+
+                if (proj2.y >= 0) {
+                    /*double coefdir_coin_haut = -proj1.y/(LARGEUR_FENETRE-proj1.x);
+                    double coefdir_coin_bas = (HAUTEUR_FENETRE-proj1.y)/-proj1.x;
+                    double coefdir_segment = (proj2.y-proj1.y)/(proj2.x-proj1.x);
+                    if (coefdir_coin_haut < coefdir_segment
+                        && coefdir_coin_bas > coefdir_segment) {
+                        bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                    }
+                    else { return; }*/
+
+                    int coef_coin_haut = -proj1.y*(proj2.x-proj1.x);
+                    //(A*B) -> A=0: impossible car p1.y<0, B=0: impossible car p2.x>=0 et p1.x<0
+                    int coef_segment = (proj2.y-proj1.y)*(LARGEUR_FENETRE-proj1.x);
+                    //(C*D) -> C=0: impossible car p2.y>=0 et p1.y<0, D=0: impossible car p1.x<0
+                    if (coef_coin_haut <= coef_segment) {
+
+                        int coef_coin_bas = (HAUTEUR_FENETRE-proj1.y)*(proj2.x-proj1.x);
+                        //(A*B) -> si A=0: impossible car p1.y<0, B=0: impossible car p2.x>=0 et p1.x<0
+                        coef_segment = (proj2.y-proj1.y)*-proj1.x;
+                        //(C*D) -> si C=0: impossible car p2.y>=0 et p1.y<0, D=0: impossible car p1.x<0
+                        if (coef_coin_bas >= coef_segment) {
+                            bresenham(&proj1, &proj2, epaisseur, r,v,b);
+                        }
+                    }
+                    else { return; }
+
+                }
+                else { return; }
+
+            }
+        }
+        else { return; }
+
+	}
+}
 
 
 
@@ -362,8 +751,6 @@ void bresenham(Point2D* po1, Point2D* po2, int epaisseur, int r, int g, int b){
 					(p1.y -= 1);
 				}
 			}
-		} else {
-			afficher_point2D(&p1, epaisseur, r,g,b);
 		}
 	}
 }

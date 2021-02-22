@@ -11,6 +11,7 @@
 #include "rendu.h"
 #include "graphe.h"
 #include "vecteur3d.h"
+#include "vecteur2d.h"
 #include "generation_terrain.h"
 
 
@@ -47,6 +48,18 @@ int main(int argc, char const *argv[])
 		init_renderer();
 		init_texture();
 		SDL_RenderClear(renderer);
+
+
+		//test
+		Point2D pa = {500, 600},
+				pb = {500, 400},
+				pc = {0, HAUTEUR_FENETRE};
+		//Arete3D* atest = {&pa, &pb};
+		/*Vecteur2D va, vb;
+		getVecteur2D(&pa, &pb, &va);
+		getVecteur2D(&pa, &pc, &vb);
+		printf("angle: %lf\n", getAngle2Dv(&vb, &va));*/
+
 
 
 		int mx, my;
@@ -138,16 +151,15 @@ int main(int argc, char const *argv[])
 			SDL_LockTexture(texture, NULL, &tmp, &pitch);
 
 
-			//afficher_points_gstat(terrain, 1, 128,255,0);
-			afficher_aretes_gstat(terrain, 1, 128,255,0);
-			//afficher_couleur_relief_points(terrain, 2, -750, 750);
+				//afficher_points_gstat(terrain, 1, 128,255,0);
+				afficher_aretes_gstat(terrain, 1, 128,255,0);
+				//afficher_couleur_relief_points(terrain, 2, -750, 750);
 
-			afficher_aretes(&pyramide,  4, 255,255,0);
-			afficher_aretes(&prisme,  4, 0,128,255);
+				afficher_aretes(&pyramide,  4, 255,255,0);
+				afficher_aretes(&prisme,  4, 0,128,255);
 
 
 			SDL_UnlockTexture(texture);
-
 			// afficher la nouvelle frame
 			SDL_RenderCopy(renderer, texture, NULL, NULL);
 			SDL_RenderPresent(renderer);

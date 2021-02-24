@@ -41,6 +41,7 @@ int main(int argc, char const *argv[])
 	int quit = 0;
 	SDL_Event event;
 	clock_t t_deb_frame, t_fin_frame;
+	float sensi_souris = 200;
 
 	srand(time(NULL));
 
@@ -66,6 +67,10 @@ int main(int argc, char const *argv[])
 		Point2D proj1, proj2;
 		Graphe3D pyramide = {NULL, NULL};
 		Graphe3D prisme = {NULL, NULL};
+		Point2D rect_ecran[] = {{300, 300},
+				{LARGEUR_FENETRE-300, 300},
+				{LARGEUR_FENETRE-300, HAUTEUR_FENETRE-300},
+				{300, HAUTEUR_FENETRE-300}};
 
 		// nord, sud, est, ouest, arriere, avant
 		double points_cardinaux[][3] = {{0,0,rayon},{0,0,-rayon},{rayon,0,0},{-rayon,0,0},{0,rayon,0},{0,-rayon,0}};
@@ -110,19 +115,19 @@ int main(int argc, char const *argv[])
 						switch( event.key.keysym.sym )
                         {
 							case SDLK_UP:
-								alpha += 0.1;
+								alpha += sensi_souris;
 								update_cam();
 								break;
 							case SDLK_DOWN:
-								alpha -= 0.1;
+								alpha -= sensi_souris;
 								update_cam();
 								break;
 							case SDLK_LEFT:
-								beta += 0.1;
+								beta += sensi_souris;
 								update_cam();
 								break;
 							case SDLK_RIGHT:
-								beta -= 0.1;
+								beta -= sensi_souris;
 								update_cam();
 								break;
 						}
@@ -137,8 +142,8 @@ int main(int argc, char const *argv[])
 					case SDL_MOUSEMOTION:
 						SDL_GetMouseState(&mx, &my);
 						//printf("mx: %d, my: %d\n", mx, my);
-						alpha = (HAUTEUR_FENETRE-my)/500.0;
-						beta = (LARGEUR_FENETRE-mx)/500.0;
+						alpha = (HAUTEUR_FENETRE-my)/sensi_souris;
+						beta = (LARGEUR_FENETRE-mx)/sensi_souris;
 						update_cam();
 						break;
 				}
@@ -157,6 +162,10 @@ int main(int argc, char const *argv[])
 
 				afficher_aretes(&pyramide,  4, 255,255,0);
 				afficher_aretes(&prisme,  4, 0,128,255);
+
+				for (size_t i=0; i<4; i++) {
+					bresenham(rect_ecran+(i%4), rect_ecran+((i+1)%4), 5, 255, 0, 255);
+				}
 
 
 			SDL_UnlockTexture(texture);

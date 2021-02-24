@@ -22,6 +22,12 @@ void afficher_point2D(Point2D* p, int epaisseur, int r, int g, int b);
 
 //GRAPHE
 void afficher_point(Point3D* p, int epaisseur, int r, int v, int b);
+/*inline void afficher_point(Point3D* p, int epaisseur, int r, int v, int b){
+	Point2D proj;
+	proj_point( p, &proj);
+	afficher_point2D(&proj, epaisseur, r,v,b);
+}*/
+
 void afficher_points(Graphe3D* g, int epaisseur, int r, int v, int b);
 
 void afficher_arete(Arete3D* a, int epaisseur, int r, int v, int b);

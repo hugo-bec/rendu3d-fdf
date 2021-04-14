@@ -86,9 +86,17 @@ int main(int argc, char const *argv[])
 		ajout_aretes_i(&pyramide, aretes_pyramide, 8);
 
 
+		/*Graphe3D gaelle = {NULL, NULL};
+		double points_gaelle[][3] = {{0,-100,100},{0,0,0},{0,100,100},{0,0,200}};
+		ajout_points_xyz(&gaelle, points_gaelle, 4);
+		int aretes_gaelle[][2] = {{0,1},{1,2},{2,3},{3,0}};
+		ajout_aretes_i(&gaelle, aretes_gaelle, 4);*/
+
+
 		//initialisation du terrain
 		size_t nbp_x = 500, nbp_y = 500;
 		GrapheStatique3D* terrain = creer_terrain_plat(nbp_x, nbp_y, 50);
+		//printf("nbaretes: %lu\n", terrain->nbAretes);
 
 		// formation du terrain
 		//generation_double_boucle(terrain, nbp_x, nbp_y, 0, 50, 50);
@@ -162,10 +170,11 @@ int main(int argc, char const *argv[])
 
 				afficher_aretes(&pyramide,  4, 255,255,0);
 				afficher_aretes(&prisme,  4, 0,128,255);
+				//afficher_aretes(&gaelle,  4, 255,0,255);
 
-				for (size_t i=0; i<4; i++) {
+				/*for (size_t i=0; i<4; i++) {
 					bresenham(rect_ecran+(i%4), rect_ecran+((i+1)%4), 5, 255, 0, 255);
-				}
+				}*/
 
 
 			SDL_UnlockTexture(texture);

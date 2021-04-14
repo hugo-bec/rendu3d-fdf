@@ -133,7 +133,7 @@ void afficher_point2Dv1(Point2D* p, int epaisseur, int r, int g, int b){
 }
 
 
-void afficher_point2D(Point2D* p, int epaisseur, int r, int g, int b){
+__attribute((always_inline)) inline void afficher_point2D(Point2D* p, int epaisseur, int r, int g, int b){
     for (size_t i=0; i<epaisseur; i++) {
         for (size_t j=0; j<epaisseur; j++) {
             if ((p->y+(j-(epaisseur/2))) >= 0
@@ -191,8 +191,8 @@ void afficher_aretes_gstat(GrapheStatique3D* g, int epaisseur, int r, int v, int
 	/*for (Arete3D* a = g->tab_aretes; a < g->tab_aretes + g->nbAretes-1; a++) {
 		afficher_arete(a, epaisseur, r,v,b);
 	}*/
-	for (size_t i = 0; i < g->nbAretes; i++) {
-		afficher_arete(g->tab_aretes+i, epaisseur, r,v,b);
+	for (Arete3D* a = g->tab_aretes; a < g->tab_aretes + g->nbAretes; a++) {
+		afficher_arete(a, epaisseur, r,v,b);
 	}
 }
 
@@ -627,8 +627,8 @@ void afficher_aretev1(Arete3D* a, int epaisseur, int r, int v, int b){
 
 void afficher_arete(Arete3D* a, int epaisseur, int r, int v, int b){
 	Point2D proj1, proj2;//= {500, 6000};//= {500, -400}
-    int minx=300, maxx=LARGEUR_FENETRE-300,     //NON UNSIGNED car problème de comparaison avec les négatifs
-        miny=300, maxy=HAUTEUR_FENETRE-300;
+    int minx=0, maxx=LARGEUR_FENETRE,     //NON UNSIGNED car problème de comparaison avec les négatifs
+        miny=0, maxy=HAUTEUR_FENETRE;
     //unsigned int minx=0, maxx=LARGEUR_FENETRE,
     //            miny=0, maxy=HAUTEUR_FENETRE;
 	proj_point( a->p1 , &proj1 );
